@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFD File Web Processor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-process {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            font-size: 1.1rem;
+        }
+
+        #logArea {
+            background: #2b2b2b;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="card p-4">
+            <h2 class="text-center mb-4 text-primary font-weight-bold">DFD Text File Processor</h2>
+            <p class="text-muted text-center">ระบบแก้ไขข้อมูลอัตโนมัติ (คอลัมน์ 10, 11, 12, 15)</p>
+            <hr>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">1. เลือกไฟล์ต้นฉบับ (.txt)</label>
+                <input type="file" id="fileInput" class="form-control form-control-lg" accept=".txt">
+                <small class="text-danger">* รองรับภาษาไทยรหัส Windows-874 (CP874)</small>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button onclick="processDFD()" class="btn btn-process btn-lg shadow-sm">
+                    ประมวลผลและดาวน์โหลดไฟล์ใหม่
+                </button>
+            </div>
+
+            <div class="mt-4">
+                <label class="form-label fw-bold">สถานะการทำงาน:</label>
+                <textarea id="logArea" class="form-control" rows="6" readonly
+                    placeholder="รอการอัปโหลดไฟล์..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logArea = document.getElementById('logArea');
+            logArea.value += `> ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        async function processDFD() {
+            const fileInput = document.getElementById('fileInput');
+            const logArea = document.getElementById('logArea');
+
+            if (!fileInput.files.length) {
+                alert("กรุณาเลือกไฟล์ .txt ก่อนครับ");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            logArea.value = ""; // Clear log
+            log(`เริ่มประมวลผลไฟล์: ${file.name}`);
+
+            const reader = new FileReader();
+
+            // อ่านไฟล์แบบ Windows-874 (ภาษาไทย)
+            reader.readAsText(file, "windows-874");
+
+            reader.onload = function (e) {
+                try {
+                    const content = e.target.result;
+                    const lines = content.split(/\r?\n/);
+                    const processedLines = [];
+                    let count = 0;
+
+                    log(`อ่านข้อมูลได้ทั้งหมด ${lines.length} บรรทัด`);
+
+                    for (let line of lines) {
+                        if (line.trim() === "") continue;
+
+                        let parts = line.split('|');
+
+                        if (parts.length >= 15) {
+                            // คอลัมน์ 10 (Index 9): ตัดหลังช่องว่าง หรือใส่ 127
+                            let col10 = parts[9].trim();
+                            parts[9] = col10 ? col10.split(' ')[0] : '127';
+
+                            // คอลัมน์ 11 (Index 10): ลบ ต. / อ. และแทนที่ช่องว่างด้วย |
+                            let col11 = parts[10].replace(/ต\.|อ\./g, "").trim().replace(/\s+/g, "|");
+                            parts[10] = col11 ? col11 : "บ้านใหม่|ปากเกร็ด|นนทบุรี";
+
+                            // คอลัมน์ 12 (Index 11): ถ้าว่างใส่ 11120
+                            if (!parts[11].trim()) parts[11] = '11120';
+
+                            // คอลัมน์ 15 (Index 14): เปลี่ยน 1 เป็น 40(1)
+                            if (parts[14].trim() === '1') parts[14] = '40(1)';
+
+                            count++;
+                        }
+                        processedLines.push(parts.join('|'));
+                    }
+
+                    const resultText = processedLines.join('\r\n');
+
+                    log(`แก้ไขข้อมูลสำเร็จ ${count} บรรทัด`);
+                    log(`กำลังเตรียมดาวน์โหลด...`);
+
+                    // สร้างลิงก์ดาวน์โหลด
+                    downloadBlob(resultText, `PROCESSED_${file.name}`);
+
+                } catch (err) {
+                    log(`เกิดข้อผิดพลาด: ${err.message}`);
+                }
+            };
+        }
+
+        function downloadBlob(content, filename) {
+            // สร้าง Blob พร้อมกำหนด Encoding เป็น Windows-874
+            // หมายเหตุ: เบราว์เซอร์ส่วนใหญ่จะ Export เป็น UTF-8 
+            // หากต้องการความเป๊ะของ CP874 สำหรับ Excel รุ่นเก่า อาจต้องใช้ Library เสริม
+            const blob = new Blob([content], { type: 'text/plain;charset=windows-874' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            log("ดาวน์โหลดไฟล์เรียบร้อย!");
+        }
+    </script>
+
+</body>
+
+</html>

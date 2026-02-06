@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รวมไฟล์ .txt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin-top: 30px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 25px;
+            border: none;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-weight: bold;
+            font-size: 1.8rem;
+        }
+
+        .card-header p {
+            margin: 5px 0 0 0;
+            opacity: 0.95;
+            font-size: 0.95rem;
+        }
+
+        .upload-area {
+            border: 3px dashed #ff6b6b;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: #fff5f5;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            background: #ffe5e5;
+            border-color: #ee5a6f;
+        }
+
+        .upload-area.dragover {
+            background: #ffe0e0;
+            border-color: #ff4757;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+        }
+
+        .file-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .file-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .file-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            color: #ff6b6b;
+        }
+
+        .file-details {
+            text-align: left;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .file-size {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-remove:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .btn-merge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-merge:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-merge:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-back {
+            background: white;
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
+            padding: 10px 25px;
+            border-radius: 10px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .btn-back:hover {
+            background: #ff6b6b;
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        #logArea {
+            background: #2b2b2b;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            border: none;
+        }
+
+        .stats-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stats-label {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <a href="index.html" class="btn-back">
+            <i class="bi bi-arrow-left"></i> กลับหน้าหลัก
+        </a>
+
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="bi bi-files"></i> รวมไฟล์ .txt</h2>
+                <p>เลือกไฟล์ .txt หลายไฟล์เพื่อรวมเป็นไฟล์เดียว</p>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Upload Area -->
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">
+                        <i class="bi bi-cloud-upload"></i>
+                    </div>
+                    <h4>คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</h4>
+                    <p class="text-muted">รองรับไฟล์ .txt (Windows-874 / UTF-8)</p>
+                    <input type="file" id="fileInput" multiple accept=".txt" style="display: none;">
+                </div>
+
+                <!-- Stats Box -->
+                <div class="stats-box" id="statsBox" style="display: none;">
+                    <div class="stats-number" id="fileCount">0</div>
+                    <div class="stats-label">ไฟล์ที่เลือก</div>
+                </div>
+
+                <!-- File List -->
+                <div class="file-list" id="fileList"></div>
+
+                <!-- Merge Button -->
+                <div class="text-center mt-4">
+                    <button class="btn-merge" id="mergeBtn" onclick="mergeFiles()" disabled>
+                        <i class="bi bi-arrow-down-up"></i> รวมไฟล์ทั้งหมด
+                    </button>
+                </div>
+
+                <!-- Log Area -->
+                <div class="mt-4">
+                    <label class="form-label fw-bold">สถานะการทำงาน:</label>
+                    <textarea id="logArea" class="form-control" rows="6" readonly
+                        placeholder="รอการเลือกไฟล์..."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+
+        // Log function
+        function log(message) {
+            const logArea = document.getElementById('logArea');
+            logArea.value += `> ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        // Update UI
+        function updateUI() {
+            const fileList = document.getElementById('fileList');
+            const mergeBtn = document.getElementById('mergeBtn');
+            const statsBox = document.getElementById('statsBox');
+            const fileCount = document.getElementById('fileCount');
+
+            fileList.innerHTML = '';
+
+            if (selectedFiles.length > 0) {
+                statsBox.style.display = 'block';
+                fileCount.textContent = selectedFiles.length;
+                mergeBtn.disabled = false;
+
+                selectedFiles.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <div class="file-info">
+                            <div class="file-icon">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                            <div class="file-details">
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-size">${(file.size / 1024).toFixed(2)} KB</div>
+                            </div>
+                        </div>
+                        <button class="btn-remove" onclick="removeFile(${index})">
+                            <i class="bi bi-trash"></i> ลบ
+                        </button>
+                    `;
+                    fileList.appendChild(fileItem);
+                });
+            } else {
+                statsBox.style.display = 'none';
+                mergeBtn.disabled = true;
+            }
+        }
+
+        // File input change
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                selectedFiles = [...selectedFiles, ...files];
+                log(`เพิ่มไฟล์ ${files.length} ไฟล์`);
+                updateUI();
+            }
+        });
+
+        // Drag and drop
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+
+            const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.txt'));
+            if (files.length > 0) {
+                selectedFiles = [...selectedFiles, ...files];
+                log(`เพิ่มไฟล์ ${files.length} ไฟล์ (ลากและวาง)`);
+                updateUI();
+            }
+        });
+
+        // Remove file
+        function removeFile(index) {
+            const fileName = selectedFiles[index].name;
+            selectedFiles.splice(index, 1);
+            log(`ลบไฟล์: ${fileName}`);
+            updateUI();
+        }
+
+        // Merge files
+        async function mergeFiles() {
+            if (selectedFiles.length === 0) {
+                alert('กรุณาเลือกไฟล์ก่อน');
+                return;
+            }
+
+            document.getElementById('logArea').value = '';
+            log(`เริ่มรวมไฟล์ ${selectedFiles.length} ไฟล์...`);
+
+            let mergedContent = '';
+            let totalLines = 0;
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                log(`กำลังอ่านไฟล์: ${file.name} (${i + 1}/${selectedFiles.length})`);
+
+                try {
+                    const content = await readFileContent(file);
+                    const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
+
+                    mergedContent += content;
+                    if (i < selectedFiles.length - 1 && !content.endsWith('\n')) {
+                        mergedContent += '\r\n';
+                    }
+
+                    totalLines += lines.length;
+                    log(`✓ อ่านสำเร็จ: ${lines.length} บรรทัด`);
+                } catch (error) {
+                    log(`✗ เกิดข้อผิดพลาด: ${file.name} - ${error.message}`);
+                }
+            }
+
+            log(`\n=== สรุปผลการรวมไฟล์ ===`);
+            log(`จำนวนไฟล์ที่รวม: ${selectedFiles.length} ไฟล์`);
+            log(`จำนวนบรรทัดทั้งหมด: ${totalLines} บรรทัด`);
+            log(`กำลังเตรียมดาวน์โหลด...`);
+
+            // Download merged file
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const filename = `MERGED_${timestamp}.txt`;
+            downloadFile(mergedContent, filename);
+
+            log(`✓ ดาวน์โหลดไฟล์เรียบร้อย: ${filename}`);
+        }
+
+        // Read file content
+        function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    resolve(e.target.result);
+                };
+
+                reader.onerror = () => {
+                    reject(new Error('ไม่สามารถอ่านไฟล์ได้'));
+                };
+
+                // Try Windows-874 first, fallback to UTF-8
+                try {
+                    reader.readAsText(file, 'windows-874');
+                } catch (e) {
+                    reader.readAsText(file, 'utf-8');
+                }
+            });
+        }
+
+        // Download file
+        function downloadFile(content, filename) {
+            const blob = new Blob([content], { type: 'text/plain;charset=windows-874' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+
+</body>
+
+</html>
