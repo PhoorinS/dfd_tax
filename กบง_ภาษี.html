@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบแปลงไฟล์ Excel เป็น Text File ภาษี</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .upload-box {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .upload-box:hover {
+            background-color: #f9f9f9;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .note {
+            font-size: 0.85em;
+            color: #777;
+            margin-top: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>ระบบแปลงไฟล์ Excel เป็น Text File (ภ.ง.ด.)</h2>
+
+        <div class="upload-box">
+            <input type="file" id="excelFile" accept=".xlsx, .xls" />
+            <p>คลิกเพื่อเลือกไฟล์ Excel หรือลากไฟล์มาวางที่นี่</p>
+        </div>
+
+        <button id="convertBtn" onclick="convertFile()" disabled>แปลงไฟล์และดาวน์โหลด</button>
+
+        <div id="status"></div>
+
+        <div class="note">
+            <strong>คำชี้แจง:</strong><br>
+            ระบบจะดึงข้อมูลจาก Column ตามที่กำหนด และเติมข้อมูลคงที่ (เช่น 00, วันที่, เลขอ้างอิง)
+            ตามตัวอย่างไฟล์ต้นฉบับ
+        </div>
+    </div>
+
+    <script>
+        let workbookData = null;
+
+        // ตรวจจับการเลือกไฟล์
+        document.getElementById('excelFile').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // อ่าน Sheet แรก
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                // แปลงเป็น Array of Arrays (header: 1 หมายถึงให้แถวแรกเป็น index 0)
+                workbookData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                document.getElementById('status').innerText = `อ่านไฟล์สำเร็จ: พบข้อมูล ${workbookData.length} แถว`;
+                document.getElementById('convertBtn').disabled = false;
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function convertFile() {
+            if (!workbookData) return;
+
+            let txtContent = "";
+
+            // วนลูปข้อมูลแต่ละแถว (เริ่มที่ i=0 หรือ i=1 ขึ้นอยู่กับว่า Excel มีหัวตารางไหม)
+            // สมมติว่ามีหัวตาราง ให้เริ่มที่ i = 1, ถ้าไม่มีให้เริ่ม i = 0
+            const startRow = 1; // แก้เป็น 0 ถ้า Excel ไม่มีบรรทัดหัวข้อ
+
+            for (let i = startRow; i < workbookData.length; i++) {
+                const row = workbookData[i];
+
+                // ถ้าแถวนั้นไม่มีข้อมูลให้ข้าม
+                if (!row || row.length === 0) continue;
+
+                // ฟังก์ชันช่วยดึงข้อมูล (ป้องกัน error ถ้า column ไม่มีข้อมูล)
+                const getCol = (colIndex) => {
+                    // Excel Column เริ่มที่ 1 แต่ Array เริ่มที่ 0 ดังนั้นต้องลบ 1
+                    const val = row[colIndex - 1];
+                    return val !== undefined ? val : "";
+                };
+
+                // ฟังก์ชันจัดรูปแบบตัวเลขทศนิยม 2 ตำแหน่ง
+                const formatMoney = (colIndex) => {
+                    const val = parseFloat(row[colIndex - 1]);
+                    return isNaN(val) ? "0.00" : val.toFixed(2);
+                };
+
+                // สร้าง Array ข้อมูล 22 ช่อง ตามโครงสร้างที่ระบุ
+                // ข้อมูลคงที่ (Static) จะถูก Hardcode ตามตัวอย่างไฟล์ .TXT
+                let lineData = [
+                    "00",                           // 1. คงที่
+                    "994002211675",                      // 2. เลขประจำตัวผู้เสียภาษี (Col 2)
+                    "0",                   // 3. คงที่
+                    "0",                         // 4. คงที่
+                    getCol(1),                // 5. คงที่ (เลขผู้จ่ายเงิน?)
+                    "0",                   // 6. คงที่
+                    getCol(3),                      // 7. คำนำหน้าชื่อ (Col 7)
+                    getCol(4),                      // 8. ชื่อ (Col 8)
+                    getCol(5),                      // 9. นามสกุล (Col 9)
+                    getCol(6),                     // 10. เลขที่ (Col 10)
+                    getCol(7),                     // 11. ตำบล (Col 11)
+                    getCol(8),                     // 12. อำเภอ (Col 12)
+                    getCol(9),                     // 13. จังหวัด (Col 13)
+                    getCol(10),                     // 14. รหัสไปรษณีย์ (Col 14)
+                    "0",                           // 15. คงที่
+                    "2568",                         // 16. ปี (คงที่ตามตัวอย่าง)
+                    "401N",                     // 17. เงินได้ตามมาตรา (Col 17)
+                    "31122568",                     // 18. วันที่ (คงที่ตามตัวอย่าง)
+                    "0",                            // 19. คงที่
+                    formatMoney(11),                // 20. จำนวนเงินที่จ่าย (Col 18) -> ใช้ formatMoney
+                    formatMoney(12),                // 21. จำนวนเงินภาษีที่หัก (Col 20) -> ใช้ formatMoney
+                    "1"                             // 22. คงที่
+                ];
+
+                // นำข้อมูลมาต่อกันด้วยเครื่องหมาย |
+                txtContent += lineData.join("|") + "\r\n";
+            }
+
+            downloadTxtFile(txtContent, "TAX_DATA.TXT");
+        }
+
+        function downloadTxtFile(content, filename) {
+            // สร้าง Blob สำหรับ Text File
+            const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(link.href);
+
+            document.getElementById('status').innerText = "ดาวน์โหลดไฟล์เรียบร้อยแล้ว!";
+            document.getElementById('status').style.color = "green";
+        }
+    </script>
+
+</body>
+
+</html>
