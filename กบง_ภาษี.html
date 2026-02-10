@@ -297,7 +297,12 @@
 
                 // ฟังก์ชันจัดรูปแบบตัวเลขทศนิยม 2 ตำแหน่ง
                 const formatMoney = (colIndex) => {
-                    const val = parseFloat(row[colIndex - 1]);
+                    const rawVal = row[colIndex - 1];
+                    // ถ้าไม่มีข้อมูลหรือเป็น "-" ให้คืนค่า 0.00
+                    if (rawVal === undefined || rawVal === null || rawVal === "" || rawVal === "-") {
+                        return "0.00";
+                    }
+                    const val = parseFloat(rawVal);
                     return isNaN(val) ? "0.00" : val.toFixed(2);
                 };
 
