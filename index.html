@@ -4,278 +4,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ผู้ช่วยผู้ดำเนินเกมแวร์วูล์ฟ</title>
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Prompt:wght@300;400;600&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>ระบบจัดการไฟล์ภาษี DFD</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .main-container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .header-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-card h1 {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .header-card p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-card:hover::before {
+            opacity: 1;
+        }
+
+        .menu-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu-card:nth-child(1) .menu-icon {
+            color: #667eea;
+        }
+
+        .menu-card:nth-child(2) .menu-icon {
+            color: #28a745;
+        }
+
+        .menu-card:nth-child(3) .menu-icon {
+            color: #ff6b6b;
+        }
+
+        .menu-card:nth-child(4) .menu-icon {
+            color: #f093fb;
+        }
+
+        .menu-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu-description {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            position: relative;
+            z-index: 1;
+        }
+
+        .badge-new {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        @media (max-width: 768px) {
+            .header-card h1 {
+                font-size: 2rem;
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <div class="container">
+    <div class="main-container">
+        <div class="header-card">
+            <h1><i class="bi bi-file-earmark-text"></i> ระบบจัดการไฟล์ภาษี DFD</h1>
+            <p>เลือกเมนูด้านล่างเพื่อเริ่มต้นใช้งาน</p>
+        </div>
 
-        <!-- Header -->
-        <header>
-            <h1><i class="fa-solid fa-moon" style="margin-right: 12px;"></i>แวร์วูล์ฟ <span
-                    style="font-weight: 400; opacity: 0.8;">ผู้ดำเนินเกม</span></h1>
-            <p style="text-align: center; color: var(--text-secondary); max-width: 500px; margin: 0 auto;">🌙
-                ค่ำคืนที่มืดมิดใน กกมง. และเต็มไปด้วยความลึกลับ...</p>
-        </header>
-
-        <!-- SETUP SECTION -->
-        <section id="setup-section" class="card">
-            <!-- Player Count Input -->
-            <div id="player-count-section"
-                style="margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 24px;">
-                <h3 style="margin-bottom: 16px;"><i class="fa-solid fa-users-gear"
-                        style="margin-right: 8px; opacity: 0.7;"></i>จำนวนผู้เล่น</h3>
-
-                <div class="input-group">
-                    <input type="number" id="player-count-input" placeholder="กรอกจำนวนผู้เล่น (3-20)" min="3" max="20"
-                        style="flex: 2;">
-                    <button onclick="setPlayerCount()" style="flex: 1;"><i class="fa-solid fa-check"></i>
-                        ยืนยัน</button>
+        <div class="menu-grid">
+            <!-- เมนู 1: แปลงไฟล์ .txt (ข้าราชการ, ลูกจ้าง) -->
+            <a href="t01.html" class="menu-card">
+                <div class="menu-icon">
+                    <i class="bi bi-file-text"></i>
                 </div>
-
-                <div id="player-count-display"
-                    style="margin-top: 12px; text-align: center; font-size: 0.95rem; color: var(--text-secondary);">
-                    <span id="player-count-status">กรุณากรอกจำนวนผู้เล่นเพื่อเริ่มต้น</span>
+                <div class="menu-title">แปลงไฟล์ .txt</div>
+                <div class="menu-description">
+                    สำหรับข้าราชการและลูกจ้าง<br>
+                    แก้ไขข้อมูลคอลัมน์ 10, 11, 12, 15 อัตโนมัติ
                 </div>
-            </div>
+            </a>
 
-            <div id="role-randomizer"
-                style="margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 24px; opacity: 0.5; pointer-events: none;">
-                <h3 style="margin-bottom: 16px;"><i class="fa-solid fa-dice"
-                        style="margin-right: 8px; opacity: 0.7;"></i>บทบาท</h3>
-
-                <!-- Mode Toggle -->
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <button id="mode-random-btn" class="secondary" onclick="setRoleMode('random')"
-                        style="flex: 1; background: rgba(78, 205, 196, 0.2); border-color: #4ecdc4; color: #4ecdc4;">
-                        <i class="fa-solid fa-shuffle"></i> สุ่มอัตโนมัติ
-                    </button>
-                    <button id="mode-manual-btn" class="secondary" onclick="setRoleMode('manual')" style="flex: 1;">
-                        <i class="fa-solid fa-hand-pointer"></i> เลือกบทบาทเอง
-                    </button>
+            <!-- เมนู 2: แปลงไฟล์ Excel (พนักงาน, พลเรือน) -->
+            <a href="กบง_ภาษี.html" class="menu-card">
+                <div class="menu-icon">
+                    <i class="bi bi-file-earmark-excel"></i>
                 </div>
-
-                <!-- Random Mode UI -->
-                <div id="random-mode-ui">
-                    <div class="difficulty-buttons"
-                        style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap;">
-                        <button class="secondary" onclick="toggleCustomSelector()"
-                            style="flex: 100%; border-color: #9b59b6; color: #9b59b6; margin-bottom: 5px;"><i
-                                class="fa-solid fa-gear"></i> ตั้งค่าบทบาท</button>
-
-                        <button class="secondary" onclick="generateRoles('EASY')"
-                            style="flex:1; border-color: #2ecc71; color: #2ecc71;">ง่าย</button>
-                        <button class="secondary" onclick="generateRoles('MEDIUM')"
-                            style="flex:1; border-color: #f1c40f; color: #f1c40f;">ปานกลาง</button>
-                        <button class="secondary" onclick="generateRoles('HARD')"
-                            style="flex:1; border-color: #e74c3c; color: #e74c3c;">ยาก</button>
-                    </div>
-
-                    <div id="custom-role-selector"
-                        style="display: none; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #555;">
-                        <h4 style="margin: 0 0 10px 0; color: #aaa;">ดึงบทบาทเฉพาะที่ติ๊กถูก:</h4>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <button class="secondary" onclick="toggleAllRoles(true)"
-                                style="font-size: 0.8rem; padding: 5px 10px;">เลือกทั้งหมด</button>
-                            <button class="secondary" onclick="toggleAllRoles(false)"
-                                style="font-size: 0.8rem; padding: 5px 10px;">ไม่เลือกเลย</button>
-                        </div>
-                        <div id="custom-role-list"
-                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; max-height: 200px; overflow-y: auto;">
-                            <!-- Checkboxes via JS -->
-                        </div>
-                        <p style="text-align:center; font-size:0.8rem; color:#888; margin-top:10px;">
-                            กดปุ่ม ง่าย/ปานกลาง/ยาก ด้านบนเพื่อสุ่มจากกองนี้
-                        </p>
-                    </div>
+                <div class="menu-title">แปลงไฟล์ Excel</div>
+                <div class="menu-description">
+                    สำหรับพนักงานและพลเรือน<br>
+                    แปลงไฟล์ Excel เป็น Text File ภาษี
                 </div>
+            </a>
 
-                <!-- Manual Mode UI -->
-                <div id="manual-mode-ui" style="display: none;">
-                    <div
-                        style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #555;">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <h4 style="margin: 0; color: #aaa;">เลือกบทบาทและจำนวน</h4>
-                            <div id="role-count-display" style="color: #4ecdc4; font-weight: 600;">
-                                รวม: <span id="total-roles-selected">0</span> / <span id="total-players-needed">0</span>
-                            </div>
-                        </div>
-
-                        <!-- Villager Team -->
-                        <div class="role-team-section" style="margin-bottom: 20px;">
-                            <h5
-                                style="color: #3498db; margin-bottom: 10px; border-bottom: 2px solid #3498db; padding-bottom: 5px;">
-                                <i class="fa-solid fa-users"></i> ฝ่ายชาวบ้าน
-                            </h5>
-                            <div id="manual-villager-roles" class="manual-role-grid"></div>
-                        </div>
-
-                        <!-- Wolf Team -->
-                        <div class="role-team-section" style="margin-bottom: 20px;">
-                            <h5
-                                style="color: #e74c3c; margin-bottom: 10px; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">
-                                <i class="fa-solid fa-wolf-pack-battalion"></i> ฝ่ายหมาป่า
-                            </h5>
-                            <div id="manual-wolf-roles" class="manual-role-grid"></div>
-                        </div>
-
-                        <!-- Solo Team -->
-                        <div class="role-team-section" style="margin-bottom: 20px;">
-                            <h5
-                                style="color: #f1c40f; margin-bottom: 10px; border-bottom: 2px solid #f1c40f; padding-bottom: 5px;">
-                                <i class="fa-solid fa-star"></i> ฝ่ายตัวเอง
-                            </h5>
-                            <div id="manual-solo-roles" class="manual-role-grid"></div>
-                        </div>
-
-                        <!-- Mixed Team -->
-                        <div class="role-team-section">
-                            <h5
-                                style="color: #9b59b6; margin-bottom: 10px; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">
-                                <i class="fa-solid fa-masks-theater"></i> ครึ่งคนครึ่งร้าย
-                            </h5>
-                            <div id="manual-mixed-roles" class="manual-role-grid"></div>
-                        </div>
-                    </div>
-
-                    <button class="secondary" onclick="generateManualRoles()"
-                        style="width: 100%; background: rgba(78, 205, 196, 0.2); border-color: #4ecdc4; color: #4ecdc4;">
-                        <i class="fa-solid fa-check"></i> สร้างชุดบทบาท
-                    </button>
+            <!-- เมนู 3: รวมไฟล์ .txt -->
+            <a href="merge_txt.html" class="menu-card">
+                <span class="badge-new">NEW</span>
+                <div class="menu-icon">
+                    <i class="bi bi-files"></i>
                 </div>
-
-                <div id="role-summary-box"
-                    style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; display: none; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 10px 0; color: #aaa;">บทบาทในรอบนี้:</h4>
-                    <div id="role-summary-list" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        <!-- Badges/Tags for roles will go here -->
-                    </div>
+                <div class="menu-title">รวมไฟล์ .txt</div>
+                <div class="menu-description">
+                    รวมไฟล์ .txt หลายไฟล์<br>
+                    เป็นไฟล์เดียวอย่างรวดเร็ว
                 </div>
-                <button id="apply-roles-btn" onclick="applyRoles()"
-                    style="width: 100%; display: none; background-color: #34495e;">ใช้ชุดบทบาทนี้</button>
-            </div>
+            </a>
 
-            <div id="player-registration-section" style="opacity: 0.5; pointer-events: none;">
-                <h2 style="margin-top: 24px;"><i class="fa-solid fa-users"
-                        style="margin-right: 8px; opacity: 0.7;"></i>ลงทะเบียนผู้เล่น <span id="player-count"
-                        style="font-size: 0.85em; opacity: 0.8; margin-left: 8px;"></span></h2>
-
-                <div class="input-group">
-                    <input type="text" id="player-input" placeholder="ใส่ชื่อผู้เล่น...">
-                    <button onclick="addPlayer()"><i class="fa-solid fa-plus"></i> เพิ่ม</button>
+            <!-- เมนู 4: ลบบรรทัด -->
+            <a href="delete_lines.html" class="menu-card">
+                <span class="badge-new">NEW</span>
+                <div class="menu-icon">
+                    <i class="bi bi-trash"></i>
                 </div>
-
-                <div id="player-roster" style="margin-bottom: 20px;">
-                    <!-- Player inputs with Role Dropdowns will go here -->
-                    <p style="color: #666; font-style: italic; text-align: center;" id="empty-roster-msg">
-                        ยังไม่มีผู้เล่น
-                    </p>
+                <div class="menu-title">ลบบรรทัด</div>
+                <div class="menu-description">
+                    เลือกและลบบรรทัดที่ต้องการ<br>
+                    จากไฟล์ .txt ได้อย่างง่ายดาย
                 </div>
-            </div>
-
-            <button id="start-btn" onclick="startGame()" disabled
-                style="width: 100%; margin-top: 24px; font-size: 1.1rem; padding: 16px; opacity: 0.5; cursor: not-allowed;"
-                class="pulse"><i class="fa-solid fa-play" style="margin-right: 8px;"></i>เริ่มเกม</button>
-        </section>
-
-        <!-- GAME DASHBOARD (Hidden initially) -->
-        <main id="game-dashboard" class="hidden">
-
-            <!-- Phase Indicator & Timer -->
-            <div class="card phase-panel">
-                <div class="phase-indicator" id="phase-display">ช่วงเริ่มต้น</div>
-                <div class="timer-display" id="timer">05:00</div>
-                <div class="phase-controls">
-                    <button class="secondary" onclick="toggleTimer()" style="padding: 12px 20px;"><i
-                            class="fa-solid fa-stopwatch" id="timer-icon"></i></button>
-                    <button class="secondary" onclick="resetTimer()" style="padding: 12px 20px;"><i
-                            class="fa-solid fa-rotate-right"></i></button>
-                    <button onclick="nextPhase()" style="flex: 1;"><i class="fa-solid fa-forward"
-                            style="margin-right: 6px;"></i>เปลี่ยนเฟส</button>
-                </div>
-
-                <!-- Narrator Voice Controls -->
-                <div id="narrator-controls" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #444;">
-                    <button onclick="startNarration()" id="narrate-btn" class="secondary"
-                        style="width: 100%; background: rgba(167, 139, 250, 0.2); border-color: #a78bfa; color: #a78bfa; margin-bottom: 10px;">
-                        <i class="fa-solid fa-volume-high" style="margin-right: 8px;"></i>เสียงผู้บรรยาย
-                    </button>
-                    <div id="narration-playback"
-                        style="display: none; flex-direction: column; gap: 8px; margin-bottom: 10px;">
-                        <div id="current-narration"
-                            style="font-size: 0.9rem; color: #a78bfa; text-align: center; min-height: 40px; padding: 10px; background: rgba(167, 139, 250, 0.1); border-radius: 8px; margin-bottom: 8px;">
-                            <!-- Current narration text -->
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="previousNarration()" id="prev-narrate-btn" class="secondary"
-                                style="flex: 1; padding: 10px; display: none;">
-                                <i class="fa-solid fa-backward"></i> ก่อนหน้า
-                            </button>
-                            <button onclick="nextNarration()" id="next-narrate-btn" class="secondary"
-                                style="flex: 2; padding: 10px; background: rgba(78, 205, 196, 0.2); border-color: #4ecdc4; color: #4ecdc4;">
-                                <i class="fa-solid fa-forward"></i> ถัดไป
-                            </button>
-                        </div>
-                        <button onclick="stopNarration()" class="secondary"
-                            style="width: 100%; padding: 8px; border-color: #ff6b6b; color: #ff6b6b;">
-                            <i class="fa-solid fa-stop"></i> หยุดและปิด
-                        </button>
-                    </div>
-                </div>
-
-                <div id="narrator-guide"
-                    style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.9rem; color: #bbb;">
-                    <!-- Narrator prompts go here -->
-                </div>
-
-                <!-- Reset Game Button -->
-                <button onclick="resetGame()" class="secondary"
-                    style="width:100%; margin-top:10px; border-color: #444; color: #666; font-size: 0.8rem;">รีเซ็ตเกม</button>
-            </div>
-
-            <!-- Player List -->
-            <div class="player-list" id="active-players">
-                <!-- Players injected via JS -->
-            </div>
-
-        </main>
-
-    </div>
-
-    <!-- Role Reveal Modal (Optional use now) -->
-    <div id="modal" class="modal" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <h2>บทบาทของคุณคือ...</h2>
-            <div class="role-reveal-text" id="modal-role-name">WEREWOLF</div>
-            <p class="role-desc" id="modal-role-desc">คำอธิบาย</p>
-            <button onclick="closeModal()">รับทราบ</button>
+            </a>
         </div>
     </div>
 
-    <!-- Winner Modal -->
-    <div id="winner-modal" class="modal">
-        <div class="modal-content" style="border-color: var(--gold-color);">
-            <h2 style="color: var(--gold-color); font-size: 2.5rem;">จบเกม!</h2>
-            <div class="role-reveal-text" id="winner-name" style="color: white; margin: 30px 0;">
-                ผู้ชนะ: ฝ่ายชาวบ้าน
-            </div>
-            <button onclick="resetGame()" class="pulse"
-                style="background-color: var(--gold-color); color: black;">เล่นใหม่อีกครั้ง</button>
-        </div>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script src="script.js"></script>
 </body>
 
 </html>
