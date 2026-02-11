@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>รวมไฟล์ .txt - ระบบจัดการไฟล์ภาษี DFD</title>
+    <title>ลบบรรทัด - ระบบจัดการไฟล์ภาษี DFD</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         body {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             padding: 20px;
@@ -29,7 +29,7 @@
         }
 
         .card-header {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
             border-radius: 20px 20px 0 0 !important;
             padding: 25px;
@@ -49,34 +49,34 @@
         }
 
         .upload-area {
-            border: 3px dashed #ff6b6b;
+            border: 3px dashed #f093fb;
             border-radius: 15px;
             padding: 40px;
             text-align: center;
-            background: #fff5f5;
+            background: #fef5ff;
             transition: all 0.3s ease;
             cursor: pointer;
         }
 
         .upload-area:hover {
-            background: #ffe5e5;
-            border-color: #ee5a6f;
+            background: #fde5ff;
+            border-color: #f5576c;
         }
 
         .upload-area.dragover {
-            background: #ffe0e0;
-            border-color: #ff4757;
+            background: #fdd5ff;
+            border-color: #f093fb;
             transform: scale(1.02);
         }
 
         .upload-icon {
             font-size: 4rem;
-            color: #ff6b6b;
+            color: #f093fb;
             margin-bottom: 15px;
         }
 
         .file-list {
-            max-height: 300px;
+            max-height: 200px;
             overflow-y: auto;
             margin-top: 20px;
         }
@@ -105,7 +105,7 @@
 
         .file-icon {
             font-size: 2rem;
-            color: #ff6b6b;
+            color: #f093fb;
         }
 
         .file-details {
@@ -138,8 +138,8 @@
             transform: scale(1.05);
         }
 
-        .btn-merge {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        .btn-download {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
             padding: 15px 40px;
             font-size: 1.2rem;
@@ -147,15 +147,15 @@
             border-radius: 12px;
             font-weight: bold;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.3);
         }
 
-        .btn-merge:hover:not(:disabled) {
+        .btn-download:hover:not(:disabled) {
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+            box-shadow: 0 8px 20px rgba(240, 147, 251, 0.4);
         }
 
-        .btn-merge:disabled {
+        .btn-download:disabled {
             background: #ccc;
             cursor: not-allowed;
             box-shadow: none;
@@ -163,8 +163,8 @@
 
         .btn-back {
             background: white;
-            color: #ff6b6b;
-            border: 2px solid #ff6b6b;
+            color: #f093fb;
+            border: 2px solid #f093fb;
             padding: 10px 25px;
             border-radius: 10px;
             text-decoration: none;
@@ -176,7 +176,7 @@
         }
 
         .btn-back:hover {
-            background: #ff6b6b;
+            background: #f093fb;
             color: white;
             transform: translateX(-5px);
         }
@@ -188,6 +188,19 @@
             font-size: 0.9rem;
             border-radius: 10px;
             border: none;
+        }
+
+        .delete-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .delete-section h5 {
+            color: #856404;
+            margin-bottom: 15px;
         }
 
         .stats-box {
@@ -221,8 +234,8 @@
 
         <div class="card">
             <div class="card-header">
-                <h2><i class="bi bi-files"></i> รวมไฟล์ .txt</h2>
-                <p>เลือกไฟล์ .txt หลายไฟล์เพื่อรวมเป็นไฟล์เดียว</p>
+                <h2><i class="bi bi-trash"></i> ลบบรรทัด</h2>
+                <p>เลือกไฟล์ .txt และลบบรรทัดที่ต้องการออก</p>
             </div>
 
             <div class="card-body p-4">
@@ -245,10 +258,56 @@
                 <!-- File List -->
                 <div class="file-list" id="fileList"></div>
 
-                <!-- Merge Button -->
+                <!-- Delete Lines Section -->
+                <div class="delete-section" id="deleteSection" style="display: none;">
+                    <h5><i class="bi bi-exclamation-triangle"></i> ลบบรรทัดที่ต้องการ</h5>
+
+                    <div class="row align-items-center mb-3">
+                        <div class="col-md-6">
+                            <div class="alert alert-info mb-0">
+                                <strong>จำนวนบรรทัดทั้งหมด:</strong> <span id="totalLinesCount"
+                                    class="fs-5 fw-bold">0</span> บรรทัด
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                                <input type="number" class="form-control" id="lineNumberInput"
+                                    placeholder="ระบุหมายเลขบรรทัดที่ต้องการลบ" min="1">
+                                <button class="btn btn-primary" onclick="previewLine()">
+                                    <i class="bi bi-eye"></i> ดูตัวอย่าง
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Area -->
+                    <div id="linePreviewArea" style="display: none;">
+                        <div class="alert alert-warning">
+                            <h6 class="alert-heading"><i class="bi bi-exclamation-triangle"></i>
+                                ตัวอย่างบรรทัดที่จะลบ:</h6>
+                            <div class="mb-2">
+                                <strong>บรรทัดที่:</strong> <span id="previewLineNumber"></span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>เนื้อหา:</strong>
+                                <pre id="previewContent"
+                                    style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 5px; white-space: pre-wrap; word-wrap: break-word;"></pre>
+                            </div>
+                            <button class="btn btn-danger" onclick="confirmDeleteLine()">
+                                <i class="bi bi-trash-fill"></i> ยืนยันการลบ
+                            </button>
+                            <button class="btn btn-secondary" onclick="cancelPreview()">
+                                <i class="bi bi-x-circle"></i> ยกเลิก
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Download Button -->
                 <div class="text-center mt-4">
-                    <button class="btn-merge" id="mergeBtn" onclick="mergeFiles()" disabled>
-                        <i class="bi bi-arrow-down-up"></i> รวมไฟล์ทั้งหมด
+                    <button class="btn-download" id="downloadBtn" onclick="downloadModifiedFile()" disabled>
+                        <i class="bi bi-download"></i> ดาวน์โหลดไฟล์ที่แก้ไขแล้ว
                     </button>
                 </div>
 
@@ -264,6 +323,8 @@
 
     <script>
         let selectedFiles = [];
+        let allLines = [];
+        let lineToFileMap = [];
 
         // Log function
         function log(message) {
@@ -272,14 +333,117 @@
             logArea.scrollTop = logArea.scrollHeight;
         }
 
+        // Load all lines from files
+        async function loadAllLines() {
+            allLines = [];
+            lineToFileMap = [];
 
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                try {
+                    const content = await readFileContent(file);
+                    const lines = content.split(/\r?\n/);
 
+                    lines.forEach((line, index) => {
+                        allLines.push(line);
+                        lineToFileMap.push({
+                            fileName: file.name,
+                            fileIndex: i,
+                            lineInFile: index + 1
+                        });
+                    });
+                } catch (error) {
+                    log(`เกิดข้อผิดพลาดในการอ่านไฟล์: ${file.name}`);
+                }
+            }
 
+            updateTotalLinesCount();
+        }
+
+        // Update total lines count
+        function updateTotalLinesCount() {
+            const totalLinesElement = document.getElementById('totalLinesCount');
+            const deleteSection = document.getElementById('deleteSection');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            if (allLines.length > 0) {
+                totalLinesElement.textContent = allLines.length;
+                deleteSection.style.display = 'block';
+                downloadBtn.disabled = false;
+                document.getElementById('lineNumberInput').max = allLines.length;
+            } else {
+                deleteSection.style.display = 'none';
+                downloadBtn.disabled = true;
+            }
+        }
+
+        // Preview line before deletion
+        function previewLine() {
+            const lineNumber = parseInt(document.getElementById('lineNumberInput').value);
+
+            if (!lineNumber || lineNumber < 1 || lineNumber > allLines.length) {
+                alert(`กรุณาระบุหมายเลขบรรทัดระหว่าง 1 ถึง ${allLines.length}`);
+                return;
+            }
+
+            const lineIndex = lineNumber - 1;
+            let lineContent = allLines[lineIndex];
+            const fileInfo = lineToFileMap[lineIndex];
+
+            // Decode Thai characters properly for display
+            try {
+                const bytes = new Uint8Array(lineContent.length);
+                for (let i = 0; i < lineContent.length; i++) {
+                    bytes[i] = lineContent.charCodeAt(i) & 0xFF;
+                }
+
+                try {
+                    const utf8Decoder = new TextDecoder('utf-8', { fatal: true });
+                    lineContent = utf8Decoder.decode(bytes);
+                } catch (e) {
+                    const win874Decoder = new TextDecoder('windows-874');
+                    lineContent = win874Decoder.decode(bytes);
+                }
+            } catch (e) {
+                console.log('Decoding error:', e);
+            }
+
+            document.getElementById('previewLineNumber').textContent = lineNumber;
+            document.getElementById('previewContent').textContent = lineContent || '(บรรทัดว่าง)';
+            document.getElementById('linePreviewArea').style.display = 'block';
+
+            log(`แสดงตัวอย่างบรรทัดที่ ${lineNumber} จากไฟล์: ${fileInfo.fileName}`);
+        }
+
+        // Confirm and delete line
+        function confirmDeleteLine() {
+            const lineNumber = parseInt(document.getElementById('lineNumberInput').value);
+            const lineIndex = lineNumber - 1;
+            const deletedContent = allLines[lineIndex];
+            const fileInfo = lineToFileMap[lineIndex];
+
+            // Remove the line
+            allLines.splice(lineIndex, 1);
+            lineToFileMap.splice(lineIndex, 1);
+
+            // Update UI
+            updateTotalLinesCount();
+            cancelPreview();
+            document.getElementById('lineNumberInput').value = '';
+
+            log(`✓ ลบบรรทัดที่ ${lineNumber} สำเร็จ (จากไฟล์: ${fileInfo.fileName})`);
+            log(`เนื้อหาที่ลบ: ${deletedContent || '(บรรทัดว่าง)'}`);
+        }
+
+        // Cancel preview
+        function cancelPreview() {
+            document.getElementById('linePreviewArea').style.display = 'none';
+            document.getElementById('lineNumberInput').value = '';
+        }
 
         // Update UI
-        function updateUI() {
+        async function updateUI() {
             const fileList = document.getElementById('fileList');
-            const mergeBtn = document.getElementById('mergeBtn');
             const statsBox = document.getElementById('statsBox');
             const fileCount = document.getElementById('fileCount');
 
@@ -288,7 +452,6 @@
             if (selectedFiles.length > 0) {
                 statsBox.style.display = 'block';
                 fileCount.textContent = selectedFiles.length;
-                mergeBtn.disabled = false;
 
                 selectedFiles.forEach((file, index) => {
                     const fileItem = document.createElement('div');
@@ -309,9 +472,13 @@
                     `;
                     fileList.appendChild(fileItem);
                 });
+
+                await loadAllLines();
             } else {
                 statsBox.style.display = 'none';
-                mergeBtn.disabled = true;
+                allLines = [];
+                lineToFileMap = [];
+                document.getElementById('deleteSection').style.display = 'none';
             }
         }
 
@@ -357,60 +524,40 @@
             updateUI();
         }
 
-        // Merge files
-        async function mergeFiles() {
-            if (selectedFiles.length === 0) {
-                alert('กรุณาเลือกไฟล์ก่อน');
+        // Download modified file
+        async function downloadModifiedFile() {
+            if (allLines.length === 0) {
+                alert('ไม่มีข้อมูลให้ดาวน์โหลด');
                 return;
             }
 
             document.getElementById('logArea').value = '';
-            log(`เริ่มรวมไฟล์ ${selectedFiles.length} ไฟล์...`);
+            log('เริ่มเตรียมไฟล์สำหรับดาวน์โหลด...');
 
-            let mergedContent = '';
-            let totalLines = 0;
+            const modifiedContent = allLines.join('\r\n');
+            const totalLines = allLines.filter(line => line.trim() !== '').length;
 
-            // Read and merge all files
-            for (let i = 0; i < selectedFiles.length; i++) {
-                const file = selectedFiles[i];
-                try {
-                    const content = await readFileContent(file);
-                    mergedContent += content;
-                    if (i < selectedFiles.length - 1) {
-                        mergedContent += '\r\n';
-                    }
-                    const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
-                    totalLines += lines.length;
-                    log(`✓ อ่านไฟล์: ${file.name} (${lines.length} บรรทัด)`);
-                } catch (error) {
-                    log(`✗ เกิดข้อผิดพลาดในการอ่านไฟล์: ${file.name}`);
-                }
-            }
-
-            log(`\n=== สรุปผลการรวมไฟล์ ===`);
-            log(`จำนวนไฟล์ที่รวม: ${selectedFiles.length} ไฟล์`);
-            log(`จำนวนบรรทัดทั้งหมด: ${totalLines} บรรทัด`);
+            log(`\n=== สรุปผลการแก้ไข ===`);
+            log(`จำนวนไฟล์ต้นฉบับ: ${selectedFiles.length} ไฟล์`);
+            log(`จำนวนบรรทัดที่เหลือ: ${totalLines} บรรทัด`);
             log(`กำลังเตรียมดาวน์โหลด...`);
 
-            // Download merged file
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-            const filename = `MERGED_${timestamp}.txt`;
-            downloadFile(mergedContent, filename);
+            const filename = `MODIFIED_${timestamp}.txt`;
+            downloadFile(modifiedContent, filename);
 
             log(`✓ ดาวน์โหลดไฟล์เรียบร้อย: ${filename}`);
         }
 
-        // Read file content with proper Windows-874 encoding
+        // Read file content with proper encoding
         function readFileContent(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
 
                 reader.onload = (e) => {
-                    // Read as ArrayBuffer first
                     const arrayBuffer = e.target.result;
                     const uint8Array = new Uint8Array(arrayBuffer);
 
-                    // Convert to string preserving Windows-874 encoding
                     let text = '';
                     for (let i = 0; i < uint8Array.length; i++) {
                         text += String.fromCharCode(uint8Array[i]);
@@ -423,20 +570,17 @@
                     reject(new Error('ไม่สามารถอ่านไฟล์ได้'));
                 };
 
-                // Read as ArrayBuffer to preserve original encoding
                 reader.readAsArrayBuffer(file);
             });
         }
 
-        // Download file (using Windows-874 encoding like t01.html)
+        // Download file with Windows-874 encoding
         function downloadFile(content, filename) {
-            // Convert string back to bytes for Windows-874 encoding
             const bytes = new Uint8Array(content.length);
             for (let i = 0; i < content.length; i++) {
                 bytes[i] = content.charCodeAt(i) & 0xFF;
             }
 
-            // Create Blob with proper Windows-874 encoding
             const blob = new Blob([bytes], { type: 'text/plain;charset=windows-874' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');

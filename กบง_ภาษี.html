@@ -76,6 +76,69 @@
             margin-bottom: 15px;
         }
 
+        .file-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .file-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .file-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            color: #28a745;
+        }
+
+        .file-details {
+            text-align: left;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .file-size {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-remove:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
         .btn-convert {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
@@ -138,6 +201,26 @@
             display: none;
         }
 
+        .stats-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stats-label {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
         .note {
             background: #f0fdf4;
             border-left: 4px solid #28a745;
@@ -178,14 +261,23 @@
                         <i class="bi bi-cloud-upload"></i>
                     </div>
                     <h4>คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</h4>
-                    <p class="info-text">รองรับไฟล์ .xlsx, .xls</p>
-                    <input type="file" id="excelFile" class="file-input-wrapper" accept=".xlsx, .xls">
+                    <p class="info-text">รองรับไฟล์ .xlsx, .xls (เลือกได้หลายไฟล์)</p>
+                    <input type="file" id="excelFile" class="file-input-wrapper" accept=".xlsx, .xls" multiple>
                 </div>
+
+                <!-- Stats Box -->
+                <div class="stats-box" id="statsBox" style="display: none;">
+                    <div class="stats-number" id="fileCount">0</div>
+                    <div class="stats-label">ไฟล์ที่เลือก</div>
+                </div>
+
+                <!-- File List -->
+                <div class="file-list" id="fileList"></div>
 
                 <!-- Convert Button -->
                 <div class="text-center mt-4">
-                    <button class="btn-convert" id="convertBtn" onclick="convertFile()" disabled>
-                        <i class="bi bi-arrow-repeat"></i> แปลงไฟล์และดาวน์โหลด
+                    <button class="btn-convert" id="convertBtn" onclick="convertAllFiles()" disabled>
+                        <i class="bi bi-arrow-repeat"></i> แปลงไฟล์ทั้งหมดและดาวน์โหลด
                     </button>
                 </div>
 
@@ -207,8 +299,7 @@
     </div>
 
     <script>
-        let workbookData = null;
-        let selectedFileName = '';
+        let selectedFiles = [];
 
         function log(message) {
             const logArea = document.getElementById('logArea');
@@ -216,31 +307,53 @@
             logArea.scrollTop = logArea.scrollHeight;
         }
 
+        // Update UI
+        function updateUI() {
+            const fileList = document.getElementById('fileList');
+            const convertBtn = document.getElementById('convertBtn');
+            const statsBox = document.getElementById('statsBox');
+            const fileCount = document.getElementById('fileCount');
+
+            fileList.innerHTML = '';
+
+            if (selectedFiles.length > 0) {
+                statsBox.style.display = 'block';
+                fileCount.textContent = selectedFiles.length;
+                convertBtn.disabled = false;
+
+                selectedFiles.forEach((file, index) => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <div class="file-info">
+                            <div class="file-icon">
+                                <i class="bi bi-file-earmark-excel"></i>
+                            </div>
+                            <div class="file-details">
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-size">${(file.size / 1024).toFixed(2)} KB</div>
+                            </div>
+                        </div>
+                        <button class="btn-remove" onclick="removeFile(${index})">
+                            <i class="bi bi-trash"></i> ลบ
+                        </button>
+                    `;
+                    fileList.appendChild(fileItem);
+                });
+            } else {
+                statsBox.style.display = 'none';
+                convertBtn.disabled = true;
+            }
+        }
+
         // File input change
         document.getElementById('excelFile').addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            selectedFileName = file.name;
-            document.getElementById('logArea').value = '';
-            log(`เลือกไฟล์: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`);
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-
-                // อ่าน Sheet แรก
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-
-                // แปลงเป็น Array of Arrays
-                workbookData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-                log(`อ่านไฟล์สำเร็จ: พบข้อมูล ${workbookData.length} แถว`);
-                document.getElementById('convertBtn').disabled = false;
-            };
-            reader.readAsArrayBuffer(file);
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                selectedFiles = [...selectedFiles, ...files];
+                log(`เพิ่มไฟล์ ${files.length} ไฟล์`);
+                updateUI();
+            }
         });
 
         // Drag and drop
@@ -259,86 +372,129 @@
             e.preventDefault();
             uploadArea.classList.remove('dragover');
 
-            const files = e.dataTransfer.files;
+            const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.xlsx') || f.name.endsWith('.xls'));
             if (files.length > 0) {
-                const file = files[0];
-                if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-                    // Trigger the file input change
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    document.getElementById('excelFile').files = dataTransfer.files;
-                    document.getElementById('excelFile').dispatchEvent(new Event('change'));
-                }
+                selectedFiles = [...selectedFiles, ...files];
+                log(`เพิ่มไฟล์ ${files.length} ไฟล์ (ลากและวาง)`);
+                updateUI();
             }
         });
 
-        function convertFile() {
-            if (!workbookData) return;
+        // Remove file
+        function removeFile(index) {
+            const fileName = selectedFiles[index].name;
+            selectedFiles.splice(index, 1);
+            log(`ลบไฟล์: ${fileName}`);
+            updateUI();
+        }
 
-            document.getElementById('logArea').value = '';
-            log('เริ่มแปลงไฟล์...');
+        // Convert single file
+        async function convertFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
 
-            let txtContent = "";
+                        // อ่าน Sheet แรก
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
 
-            // วนลูปข้อมูลแต่ละแถว (เริ่มที่ i=1 เพราะมีหัวตาราง)
-            const startRow = 1;
+                        // แปลงเป็น Array of Arrays
+                        const workbookData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-            for (let i = startRow; i < workbookData.length; i++) {
-                const row = workbookData[i];
+                        let txtContent = "";
+                        const startRow = 1;
 
-                // ถ้าแถวนั้นไม่มีข้อมูลให้ข้าม
-                if (!row || row.length === 0) continue;
+                        for (let i = startRow; i < workbookData.length; i++) {
+                            const row = workbookData[i];
+                            if (!row || row.length === 0) continue;
 
-                // ฟังก์ชันช่วยดึงข้อมูล
-                const getCol = (colIndex) => {
-                    const val = row[colIndex - 1];
-                    return val !== undefined ? val : "";
-                };
+                            const getCol = (colIndex) => {
+                                const val = row[colIndex - 1];
+                                return val !== undefined ? val : "";
+                            };
 
-                // ฟังก์ชันจัดรูปแบบตัวเลขทศนิยม 2 ตำแหน่ง
-                const formatMoney = (colIndex) => {
-                    const rawVal = row[colIndex - 1];
-                    // ถ้าไม่มีข้อมูลหรือเป็น "-" ให้คืนค่า 0.00
-                    if (rawVal === undefined || rawVal === null || rawVal === "" || rawVal === "-") {
-                        return "0.00";
+                            const formatMoney = (colIndex) => {
+                                const rawVal = row[colIndex - 1];
+                                if (rawVal === undefined || rawVal === null || rawVal === "" || rawVal === "-") {
+                                    return "0.00";
+                                }
+                                const val = parseFloat(rawVal);
+                                return isNaN(val) ? "0.00" : val.toFixed(2);
+                            };
+
+                            let lineData = [
+                                "00",
+                                "994002211675",
+                                "0",
+                                "0",
+                                getCol(1),
+                                "0",
+                                getCol(3),
+                                getCol(4),
+                                getCol(5),
+                                getCol(6),
+                                getCol(7),
+                                getCol(8),
+                                getCol(9),
+                                getCol(10),
+                                "0",
+                                "2568",
+                                "401N",
+                                "31122568",
+                                "0",
+                                formatMoney(11),
+                                formatMoney(12),
+                                "1"
+                            ];
+
+                            txtContent += lineData.join("|") + "\r\n";
+                        }
+
+                        resolve({ content: txtContent, rows: workbookData.length - 1 });
+                    } catch (error) {
+                        reject(error);
                     }
-                    const val = parseFloat(rawVal);
-                    return isNaN(val) ? "0.00" : val.toFixed(2);
                 };
+                reader.onerror = () => reject(new Error('ไม่สามารถอ่านไฟล์ได้'));
+                reader.readAsArrayBuffer(file);
+            });
+        }
 
-                // สร้าง Array ข้อมูล 22 ช่อง
-                let lineData = [
-                    "00",
-                    "994002211675",
-                    "0",
-                    "0",
-                    getCol(1),
-                    "0",
-                    getCol(3),
-                    getCol(4),
-                    getCol(5),
-                    getCol(6),
-                    getCol(7),
-                    getCol(8),
-                    getCol(9),
-                    getCol(10),
-                    "0",
-                    "2568",
-                    "401N",
-                    "31122568",
-                    "0",
-                    formatMoney(11),
-                    formatMoney(12),
-                    "1"
-                ];
-
-                txtContent += lineData.join("|") + "\r\n";
+        // Convert all files
+        async function convertAllFiles() {
+            if (selectedFiles.length === 0) {
+                alert('กรุณาเลือกไฟล์ก่อน');
+                return;
             }
 
-            log(`แปลงข้อมูลสำเร็จ ${workbookData.length - 1} แถว`);
-            log('กำลังเตรียมดาวน์โหลด...');
+            document.getElementById('logArea').value = '';
+            log(`เริ่มแปลงไฟล์ ${selectedFiles.length} ไฟล์...`);
 
-            downloadTxtFile(txtContent, "TAX_DATA.TXT");
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                try {
+                    log(`\nกำลังแปลงไฟล์: ${file.name}`);
+                    const result = await convertFile(file);
+
+                    // Generate filename from original Excel filename
+                    const baseFileName = file.name.replace(/\.(xlsx|xls)$/i, '');
+                    const txtFileName = `${baseFileName}.txt`;
+
+                    downloadTxtFile(result.content, txtFileName);
+                    log(`✓ แปลงสำเร็จ: ${result.rows} แถว`);
+                    log(`✓ ดาวน์โหลด: ${txtFileName}`);
+                } catch (error) {
+                    log(`✗ เกิดข้อผิดพลาดในการแปลงไฟล์: ${file.name}`);
+                    console.error(error);
+                }
+            }
+
+            log(`\n=== สรุปผลการแปลง ===`);
+            log(`จำนวนไฟล์ทั้งหมด: ${selectedFiles.length} ไฟล์`);
+            log(`เสร็จสิ้นการแปลงทั้งหมด`);
         }
 
         function downloadTxtFile(content, filename) {
