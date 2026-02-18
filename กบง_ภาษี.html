@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แปลงไฟล์ Excel - ระบบจัดการไฟล์ภาษี DFD</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
@@ -425,28 +426,40 @@
                                 return isNaN(val) ? "0.00" : val.toFixed(2);
                             };
 
+                            // Helper function to check if value is empty or "-"
+                            const getColWithDefault = (colIndex, defaultValue) => {
+                                const val = row[colIndex - 1];
+                                if (val === undefined || val === null || val === "" || val === " " || val === "-" || val === " - " || val === "  -  ") {
+                                    return defaultValue;
+                                }
+                                return val;
+                            };
+
+                            // Get field 5 (column 1) and remove spaces and dashes
+                            const field5 = String(getCol(1)).replace(/[ -]/g, "");
+
                             let lineData = [
                                 "00",
                                 "994002211675",
                                 "0",
                                 "0",
-                                getCol(1),
+                                field5,  // Field 5: Remove spaces
                                 "0",
                                 getCol(3),
                                 getCol(4),
                                 getCol(5),
-                                getCol(6),
-                                getCol(7),
-                                getCol(8),
-                                getCol(9),
-                                getCol(10),
+                                getColWithDefault(6, "125"),        // Field 9: บ้านเลขที่ (col K), Default "125"
+                                getColWithDefault(7, "บ้านใหม่"),   // Field 10: ตำบล (col L), Default "บ้านใหม่"
+                                getColWithDefault(8, "ปากเกร็ด"),   // Field 11: อำเภอ (col M), Default "ปากเกร็ด"
+                                getColWithDefault(9, "นนทบุรี"),    // Field 12: จังหวัด (col N), Default "นนทบุรี"
+                                getColWithDefault(10, "11120"),      // Field 13: รหัสไปรษณีย์ (col O), Default "11120"
                                 "0",
                                 "2568",
                                 "401N",
                                 "31122568",
                                 "0",
-                                formatMoney(11),
-                                formatMoney(12),
+                                formatMoney(11),   // จำนวนเงินที่จ่าย (col P)
+                                formatMoney(12),   // จำนวนเงินภาษีที่หัก (col Q)
                                 "1"
                             ];
 
@@ -473,6 +486,10 @@
             document.getElementById('logArea').value = '';
             log(`เริ่มแปลงไฟล์ ${selectedFiles.length} ไฟล์...`);
 
+            // Create a new JSZip instance
+            const zip = new JSZip();
+            let successCount = 0;
+
             for (let i = 0; i < selectedFiles.length; i++) {
                 const file = selectedFiles[i];
                 try {
@@ -483,17 +500,41 @@
                     const baseFileName = file.name.replace(/\.(xlsx|xls)$/i, '');
                     const txtFileName = `${baseFileName}.txt`;
 
-                    downloadTxtFile(result.content, txtFileName);
+                    // Add file to ZIP instead of downloading
+                    zip.file(txtFileName, result.content);
+
                     log(`✓ แปลงสำเร็จ: ${result.rows} แถว`);
-                    log(`✓ ดาวน์โหลด: ${txtFileName}`);
+                    log(`✓ เพิ่มไฟล์ในแพ็คเกจ: ${txtFileName}`);
+                    successCount++;
                 } catch (error) {
                     log(`✗ เกิดข้อผิดพลาดในการแปลงไฟล์: ${file.name}`);
                     console.error(error);
                 }
             }
 
+            // Generate and download ZIP file
+            if (successCount > 0) {
+                log(`\nกำลังสร้างไฟล์ ZIP...`);
+                try {
+                    const zipBlob = await zip.generateAsync({ type: 'blob' });
+                    const zipFileName = `converted_files_${new Date().getTime()}.zip`;
+
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(zipBlob);
+                    link.download = zipFileName;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+
+                    log(`✓ ดาวน์โหลดไฟล์ ZIP สำเร็จ: ${zipFileName}`);
+                } catch (error) {
+                    log(`✗ เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP`);
+                    console.error(error);
+                }
+            }
+
             log(`\n=== สรุปผลการแปลง ===`);
             log(`จำนวนไฟล์ทั้งหมด: ${selectedFiles.length} ไฟล์`);
+            log(`แปลงสำเร็จ: ${successCount} ไฟล์`);
             log(`เสร็จสิ้นการแปลงทั้งหมด`);
         }
 

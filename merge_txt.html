@@ -376,9 +376,6 @@
                 try {
                     const content = await readFileContent(file);
                     mergedContent += content;
-                    if (i < selectedFiles.length - 1) {
-                        mergedContent += '\r\n';
-                    }
                     const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
                     totalLines += lines.length;
                     log(`✓ อ่านไฟล์: ${file.name} (${lines.length} บรรทัด)`);
