@@ -367,16 +367,16 @@
             document.getElementById('logArea').value = '';
             log(`เริ่มรวมไฟล์ ${selectedFiles.length} ไฟล์...`);
 
-            let mergedContent = '';
+            let allLines = [];
             let totalLines = 0;
 
-            // Read and merge all files
+            // Read all files
             for (let i = 0; i < selectedFiles.length; i++) {
                 const file = selectedFiles[i];
                 try {
                     const content = await readFileContent(file);
-                    mergedContent += content;
                     const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
+                    allLines.push(...lines);
                     totalLines += lines.length;
                     log(`✓ อ่านไฟล์: ${file.name} (${lines.length} บรรทัด)`);
                 } catch (error) {
@@ -384,9 +384,45 @@
                 }
             }
 
+            // Process and merge duplicates
+            let mergedMap = new Map();
+            let rawLines = [];
+
+            for (let line of allLines) {
+                let parts = line.split('|');
+                if (parts.length >= 21) {
+                    // ถ้ายอดเงินที่จ่าย (Index 19) เป็น 0 ให้เอารายการนั้นออก
+                    if (parseFloat(parts[19] || 0) === 0) {
+                        continue;
+                    }
+
+                    // ใช้ชื่อ (Index 7) และ เลขประจำตัวผู้เสียภาษี (Index 4) เป็น Key
+                    let key = parts[4] + "_" + parts[7] + "_" + parts[8];
+                    if (mergedMap.has(key)) {
+                        let existing = mergedMap.get(key);
+                        // รวมยอดเงินที่จ่าย (Index 19) และภาษีที่หัก (Index 20)
+                        existing[19] = (parseFloat(existing[19] || 0) + parseFloat(parts[19] || 0)).toFixed(2);
+                        existing[20] = (parseFloat(existing[20] || 0) + parseFloat(parts[20] || 0)).toFixed(2);
+                    } else {
+                        mergedMap.set(key, parts);
+                    }
+                } else {
+                    rawLines.push(line);
+                }
+            }
+
+            let resultLines = [];
+            for (let parts of mergedMap.values()) {
+                resultLines.push(parts.join('|'));
+            }
+            resultLines = resultLines.concat(rawLines);
+
+            let mergedContent = resultLines.join('\r\n') + '\r\n';
+
             log(`\n=== สรุปผลการรวมไฟล์ ===`);
             log(`จำนวนไฟล์ที่รวม: ${selectedFiles.length} ไฟล์`);
-            log(`จำนวนบรรทัดทั้งหมด: ${totalLines} บรรทัด`);
+            log(`จำนวนบรรทัดก่อนรวม: ${totalLines} บรรทัด`);
+            log(`จำนวนบรรทัดหลังรวมรายการซ้ำ: ${resultLines.length} บรรทัด`);
             log(`กำลังเตรียมดาวน์โหลด...`);
 
             // Download merged file

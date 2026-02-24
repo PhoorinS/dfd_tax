@@ -419,7 +419,7 @@
 
                             const formatMoney = (colIndex) => {
                                 const rawVal = row[colIndex - 1];
-                                if (rawVal === undefined || rawVal === null || rawVal === "" || rawVal === "-") {
+                                if (rawVal === undefined || rawVal === null || rawVal === "" || rawVal === "-" || rawVal === "0") {
                                     return "0.00";
                                 }
                                 const val = parseFloat(rawVal);
@@ -448,7 +448,7 @@
                                 getCol(3),
                                 getCol(4),
                                 getCol(5),
-                                getColWithDefault(6, "125"),        // Field 9: บ้านเลขที่ (col K), Default "125"
+                                String(getColWithDefault(6, "125")).substring(0, 30), // Field 9: บ้านเลขที่ (col K), Default "125" (max 30 chars)
                                 getColWithDefault(7, "บ้านใหม่"),   // Field 10: ตำบล (col L), Default "บ้านใหม่"
                                 getColWithDefault(8, "ปากเกร็ด"),   // Field 11: อำเภอ (col M), Default "ปากเกร็ด"
                                 getColWithDefault(9, "นนทบุรี"),    // Field 12: จังหวัด (col N), Default "นนทบุรี"
